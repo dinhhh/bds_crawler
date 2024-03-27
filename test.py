@@ -1,4 +1,5 @@
 import time
+from utils import bypass
 from sys import platform
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -12,6 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 from parser import contact_parser, address_parser, project_parser
 from object import objs
+from crawler import bds_crawler
+from exporters import console_exporter
 # driver = webdriver.Chrome()
 
 # random_port = get_random_port() # uncomment to use random port
@@ -27,35 +30,20 @@ if __name__ == '__main__':
     options = webdriver.ChromeOptions()
     options.add_argument("window-size=1920,1200")
     driver = webdriver.Chrome(service=s, options=options)
-    url = "https://batdongsan.com.vn/ban-can-ho-chung-cu-duong-huynh-van-nghe-phuong-sai-dong-prj-le-grand-jardin-sai-dong/cdt-brg-group-mo-ban-quy-hang-l1-l2-view-chiet-khau-cao-nhat-thi-truong-qua-tang-khung-pr39395998"
+    # url = "https://batdongsan.com.vn/ban-can-ho-chung-cu-duong-huynh-van-nghe-phuong-sai-dong-prj-le-grand-jardin-sai-dong/cdt-brg-group-mo-ban-quy-hang-l1-l2-view-chiet-khau-cao-nhat-thi-truong-qua-tang-khung-pr39395998"
     # driver.get("https://batdongsan.com.vn/ban-nha-rieng-duong-dai-lo-thang-long-xa-van-con/chinh-chu-ban-4-tang-tai-song-phuong-hoai-duc-ha-noi-km-13-ng-pr35559367")
-    driver.get(url)
-    address = driver.find_element(By.XPATH, '//*[contains(concat( " ", @class, " " ), concat( " ", "js__pr-address", " " ))]').text
-    html_from_page = driver.page_source
-    contact = contact_parser.parse(html_from_page)
-    address = address_parser.parse(address)
-    cus_attrs = driver.find_elements(By.XPATH, '//*[contains(concat( " ", @class, " " ), concat( " ", "re__pr-specs-content-item", " " ))]')
-    project = project_parser.parse(driver=driver)
-    desc = driver.find_element(By.XPATH, '//*[contains(concat( " ", @class, " " ), concat( " ", "js__tracking", " " ))]').text
-    l = []
-    for attr in cus_attrs:
-        txt = attr.text
-        i = txt.index("\n")
-        key = txt[0:i]
-        value = txt[i + 1:len(txt)]
-        l.append({key: value})
-    bds = objs.Bds()
-    bds.title = driver.title
-    bds.contact = contact
-    bds.address = address
-    bds.cus_attr = l
-    bds.link = url
-    bds.project = project
-    bds.desc = desc
-    print(bds)
-
-    # assert "Python" in driver.title
-    # driver.close()
-    # time.sleep(3)
-    # gl.stop()
-
+    for page in range(1, 3):
+        url = f"https://batdongsan.com.vn/nha-dat-ban-ha-noi/p{page}"
+        driver.get(url)
+        bypass.avoid_bot_detection(driver=driver)
+        exporter = console_exporter.ConsoleExporter()
+        # crawler = bds_crawler.BdsCrawler(driver=driver, exporter=console_exporter)
+        # crawler.crawl()
+        links = driver.find_elements(By.XPATH, '//*[contains(concat( " ", @class, " " ), concat( " ", "js__card-title", " " ))]')
+        for link in links:
+            link.click()
+            bypass.avoid_bot_detection(driver=driver)
+            crawler = bds_crawler.BdsCrawler(driver=driver, exporter=exporter)
+            crawler.crawl()
+            driver.execute_script("window.history.go(-1)")
+            time.sleep(5)
