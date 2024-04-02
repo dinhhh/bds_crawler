@@ -11,7 +11,7 @@ def parse(driver: webdriver.Chrome) -> objs.Project:
     if project_name_element is not None:
         project_name = project_name_element.text
     html_from_page = driver.page_source
-    soup = BeautifulSoup(html_from_page, "html.parser")
+    soup = BeautifulSoup(html_from_page, "html.parsers")
 
     project_investor = None
     icons = soup.find_all(class_='re__icon-office--sm')  # icon before project owner

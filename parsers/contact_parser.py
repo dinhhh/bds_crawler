@@ -4,7 +4,7 @@ import json
 from object import objs
 
 def parse(html: str) -> objs.Contact:
-    soup = BeautifulSoup(html, "html.parser")
+    soup = BeautifulSoup(html, "html.parsers")
     scripts_tag = soup.find_all("script")
     func_info = ""
     for script in scripts_tag:
