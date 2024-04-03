@@ -114,9 +114,9 @@ class Bds():
         self.post_id = None
 
     def reprJSON(self):
-        return dict(link=self.link, title=self.title, desc=self.desc, price=self.price,
+        return dict(id=self.id, link=self.link, title=self.title, desc=self.desc, price=self.price,
                     project=self.project, cus_attr=self.cus_attr, contact=self.contact, address=self.address,
-                    created_date=self.created_date, expire_date=self.expire_date, post_category=self.post_category, post_id=self.post_id)
+                    created_date=self.created_date, expire_date=self.expire_date, post_category=self.post_category)
 
 class ComplexEncoder(json.JSONEncoder):
     def default(self, obj):

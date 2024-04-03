@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from exporters.abstract_exporter import AbstractExporter
 from object.objs import Bds
 from parsers import contact_parser, address_parser, project_parser
-from utils import logger
+from utils import logger, str_cleaner
 
 # crawl page luu thong tin bat dong san cu the
 class BdsCrawler():
@@ -50,7 +50,7 @@ class BdsCrawler():
             bds.desc = desc
 
             post_info = self.driver.find_element(By.XPATH, '//*[contains(concat( " ", @class, " " ), concat( " ", "js__pr-config", " " ))]').text.split('\n')
-            # post_info có dạng: ['Ngày đăng', '31/03/2024', 'Ngày hết hạn', '10/04/2024', 'Loại tin', 'Tin thường', 'Mã tin', '39253323']
+            #  post_info có dạng: ['Ngày đăng', '31/03/2024', 'Ngày hết hạn', '10/04/2024', 'Loại tin', 'Tin thường', 'Mã tin', '39253323']
             for index, key in enumerate(post_info):
                 if key.upper() == 'Ngày đăng'.upper():
                     bds.created_date = post_info[index + 1]
@@ -60,6 +60,7 @@ class BdsCrawler():
                     bds.post_category = post_info[index + 1]
                 if key.upper() == 'Mã tin'.upper():
                     bds.id = post_info[index + 1]
+                    bds.post_id = post_info[index + 1]
             # set to final attribute
             self.bds = bds
         except:

@@ -31,11 +31,11 @@ if __name__ == '__main__':
 
     # Todo: uncomment to run
 
-    for page in range(2, 3):
+    for page in range(1, 10):
         domain = "https://batdongsan.com.vn"
         url = f"https://batdongsan.com.vn/nha-dat-ban-ha-noi/p{page}"
         driver.get(url)
-        print(f"Driver get page {page}")
+        logger.get_logger().info(f"Driver get page {page}")
         bypass.avoid_bot_detection(driver=driver)
         # exporter = console_exporter.ConsoleExporter()
         exporter = json_exporter.JsonExporter()
