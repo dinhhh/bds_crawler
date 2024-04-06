@@ -4,3 +4,5 @@
 venv
 *.zip
 chromedriver.exe
+cfg.yaml
+output_bk

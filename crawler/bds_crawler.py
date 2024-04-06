@@ -11,6 +11,7 @@ class BdsCrawler():
     exporter: AbstractExporter
     bds: Bds
     driver: Chrome
+    CONVERT_FROM_TY_TO_TRIEU = 1000
 
     def __init__(self, driver: Chrome, exporter: AbstractExporter):
         self.driver = driver
@@ -63,5 +64,47 @@ class BdsCrawler():
                     bds.post_id = post_info[index + 1]
             # set to final attribute
             self.bds = bds
+            self.parse_price()
         except:
             logger.get_logger().error(f"Error while parse bds at {self.driver.current_url}")
+
+    def parse_price(self):
+        raw_price = str(self.get_cus_attr_by_key('Mức giá'))
+        if (not raw_price) or raw_price.upper() == 'THỎA THUẬN':
+            return
+
+        price = float(str_cleaner.get_all_num_from_str(raw_price)[0]) if len(str_cleaner.get_all_num_from_str(raw_price)) > 0 else None
+        if not price:
+            logger.get_logger().error(f"Can not parse price from {raw_price}")
+            return
+
+        area = -1
+        raw_area = str(self.get_cus_attr_by_key('Diện tích'))
+        area = float(str_cleaner.get_all_num_from_str(raw_area)[0]) if len(
+                str_cleaner.get_all_num_from_str(raw_area)[0]) > 0 else None
+        # for cus_att in self.bds.cus_attr:
+        #     if 'Diện tích' in cus_att.keys():
+        #         raw_area = cus_att['Diện tích']
+                # area = float(str_cleaner.get_all_num_from_str(raw_area)[0]) if len(
+                #     str_cleaner.get_all_num_from_str(raw_area)[0]) > 0 else None
+                # if not area:
+                #     logger.get_logger().error(f"Can not parse price from {raw_area}")
+                #     return
+
+        total_price = None
+        if 'triệu/m²'.upper() in raw_price.upper():
+            total_price = price * area
+        elif 'tỷ/m²'.upper() in raw_price.upper():
+            total_price = price * area * self.CONVERT_FROM_TY_TO_TRIEU
+        elif 'triệu'.upper() in raw_price.upper():
+            total_price = price
+        elif 'tỷ'.upper() in raw_price.upper():
+            total_price = price * self.CONVERT_FROM_TY_TO_TRIEU
+
+        self.bds.total_price = str(total_price)
+        self.bds.price_per_m2 = str(total_price / area)
+
+    def get_cus_attr_by_key(self, key: str) -> dict:
+        for cus_att in self.bds.cus_attr:
+            if key in cus_att.keys():
+                return cus_att[key]
